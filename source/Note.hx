@@ -153,6 +153,14 @@ class Note extends FlxSprite
 					noMissAnimation = true;
 				case 'GF Sing':
 					gfNote = true;
+				case 'Fire Note':
+					ignoreNote = mustPress;
+					reloadNote('FIRE');
+					noteSplashTexture = 'HURTnoteSplashes';
+					colorSwap.hue = 0;
+					colorSwap.saturation = 0;
+					colorSwap.brightness = 0;
+					lowPriority = true;
 			}
 			noteType = value;
 		}
