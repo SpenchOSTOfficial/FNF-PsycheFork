@@ -307,6 +307,10 @@ class PlayState extends MusicBeatState
 	private var controlArray:Array<String>;
 
 	var precacheList:Map<String, String> = new Map<String, String>();
+	
+	// Burn functions
+	var burning:Bool = false;
+	var burnLoss:Float = 0.001;
 
 	override public function create()
 	{
@@ -2835,10 +2839,13 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		/*if (FlxG.keys.justPressed.NINE)
-		{
-			iconP1.swapOldIcon();
-		}*/
+		if (burning) {
+			health -= burnLoss * healthLoss;
+			new FlxTimer().start(3, function(burn:FlxTimer) {
+				burning = false;
+			});
+		}
+
 		callOnLuas('onUpdate', [elapsed]);
 
 		switch (curStage)
@@ -3753,6 +3760,19 @@ class PlayState extends MusicBeatState
 				} else {
 					FunkinLua.setVarInArray(this, value1, value2);
 				}
+
+			case 'Change Icon':
+				var iconToChange:String = value2;
+				switch(value1.toLowerCase().trim()) {
+					case 'dad' | 'opponent':
+						iconP2.changeIcon(iconToChange);
+
+					case 'bf' | 'boyfriend' | 'player':
+						iconP1.changeIcon(iconToChange);
+					default:
+						iconP2.changeIcon(iconToChange);
+				}
+				reloadHealthBarColors();
 		}
 		callOnLuas('onEvent', [eventName, value1, value2]);
 	}
@@ -4522,6 +4542,7 @@ class PlayState extends MusicBeatState
 
 	function opponentNoteHit(note:Note):Void
 	{
+		if (healthBar.percent > 19) health -= 0.023;
 		if (Paths.formatToSongPath(SONG.song) != 'tutorial')
 			camZooming = true;
 
@@ -4633,6 +4654,13 @@ class PlayState extends MusicBeatState
 				{
 					boyfriend.playAnim(animToPlay + note.animSuffix, true);
 					boyfriend.holdTimer = 0;
+				}
+
+				if(note.noteType == 'Fire Note') {
+					if(boyfriend.animOffsets.exists('hurt')) {
+						boyfriend.playAnim('hurt', true);
+						burning = true;
+					}
 				}
 
 				if(note.noteType == 'Hey!') {
