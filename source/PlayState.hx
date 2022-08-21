@@ -310,7 +310,21 @@ class PlayState extends MusicBeatState
 	
 	// Burn functions
 	var burning:Bool = false;
-	var burnLoss:Float = 0.001;
+	var burnLoss:Float = 0.005;
+	
+	// anim things
+	var blockers:Array<String> = [
+		'attack',
+		'dodge',
+		'hey',
+		'hurt',
+		'cheer',
+		'scared',
+	];
+	
+	var animTime:Float = 0;
+	
+	var allowSinging:Bool = true;
 
 	override public function create()
 	{
@@ -2836,6 +2850,7 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	var limoSpeed:Float = 0;
+	var char:Character = boyfriend;
 
 	override public function update(elapsed:Float)
 	{
@@ -2845,6 +2860,12 @@ class PlayState extends MusicBeatState
 				burning = false;
 			});
 		}
+		
+		for (i in 0...blockers.length) {
+			if (boyfriend.animation.curAnim.name.startsWith(blockers[i]) && !boyfriend.animation.curAnim.finished)
+				allowSinging = false;
+			} else {
+				allowSinging = true;
 
 		callOnLuas('onUpdate', [elapsed]);
 
@@ -4652,7 +4673,7 @@ class PlayState extends MusicBeatState
 				}
 				else
 				{
-					boyfriend.playAnim(animToPlay + note.animSuffix, true);
+					if(allowSinging) boyfriend.playAnim(animToPlay + note.animSuffix, true);
 					boyfriend.holdTimer = 0;
 				}
 
