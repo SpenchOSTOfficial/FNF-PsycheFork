@@ -326,7 +326,7 @@ class PlayState extends MusicBeatState
 	
 	var allowSinging:Bool = true;
 	
-	var missStreak:Bool = 0;
+	var missStreak:Int = 0;
 
 	override public function create()
 	{
