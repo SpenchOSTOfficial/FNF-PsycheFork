@@ -325,6 +325,8 @@ class PlayState extends MusicBeatState
 	var animTime:Float = 0;
 	
 	var allowSinging:Bool = true;
+	
+	var missStreak:Bool = 0;
 
 	override public function create()
 	{
@@ -4473,6 +4475,7 @@ class PlayState extends MusicBeatState
 		}
 		return ret;
 	}
+	var missHealth:Float = 0.0475;
 
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
@@ -4484,7 +4487,8 @@ class PlayState extends MusicBeatState
 			}
 		});
 		combo = 0;
-		health -= daNote.missHealth * healthLoss;
+		if(missStreak >= 2) missHealth = 0.2; //20 health, like you reqested.
+		health -= missHealth * healthLoss;
 		
 		if(instakillOnMiss)
 		{
@@ -4495,6 +4499,10 @@ class PlayState extends MusicBeatState
 		//For testing purposes
 		//trace(daNote.missHealth);
 		songMisses++;
+		missStreak++;
+		new FixTimer().start(1, /*for streak*/function(tmr:FlxTimer) {
+			missStreak = 0;
+		});
 		vocals.volume = 0;
 		if(!practiceMode) songScore -= 10;
 
