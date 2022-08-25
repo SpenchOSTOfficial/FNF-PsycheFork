@@ -326,7 +326,11 @@ class PlayState extends MusicBeatState
 	
 	var allowSinging:Bool = true;
 	
+        // miss streak
 	var missStreak:Int = 0;
+
+        // thing was requested
+        var balls:Int = 5; lololololololololololololol
 
 	override public function create()
 	{
@@ -2290,9 +2294,9 @@ class PlayState extends MusicBeatState
 	public function updateScore(miss:Bool = false)
 	{
 		scoreTxt.text = 'Score: ' + songScore
-		+ ' | Misses: ' + songMisses
-		+ ' | Rating: ' + ratingName
-		+ (ratingName != '?' ? ' (${Highscore.floorDecimal(ratingPercent * 100, 2)}%) - $ratingFC' : '');
+		+ ' | Poke' Balls Left: ' + balls
+		+ ' | Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2)
+                + '%';
 
 		if(ClientPrefs.scoreZoom && !miss && !cpuControlled)
 		{
@@ -2868,6 +2872,12 @@ class PlayState extends MusicBeatState
 				allowSinging = false;
 			} else {
 				allowSinging = true;
+                        }
+                }
+
+                if (balls <= 0) {
+                        health = 0;
+                }
 
 		callOnLuas('onUpdate', [elapsed]);
 
@@ -4475,7 +4485,6 @@ class PlayState extends MusicBeatState
 		}
 		return ret;
 	}
-	var missHealth:Float = 0.0475;
 
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
@@ -4487,7 +4496,7 @@ class PlayState extends MusicBeatState
 			}
 		});
 		combo = 0;
-		if(missStreak >= 2) missHealth = 0.2; //20 health, like you reqested.
+		balls--; // AHHHH kaksndiwifneipsf no panfkalcndpsmckspxmdpskcnd
 		health -= missHealth * healthLoss;
 		
 		if(instakillOnMiss)
@@ -4499,10 +4508,6 @@ class PlayState extends MusicBeatState
 		//For testing purposes
 		//trace(daNote.missHealth);
 		songMisses++;
-		missStreak++;
-		new FixTimer().start(1, /*for streak*/function(tmr:FlxTimer) {
-			missStreak = 0;
-		});
 		vocals.volume = 0;
 		if(!practiceMode) songScore -= 10;
 
