@@ -4705,7 +4705,7 @@ class PlayState extends MusicBeatState
 				}
 
 				if(note.noteType == 'Water Note') {
-					var water = new BGSprite('splat', waterX, waterY, 2, 2);
+					var water = new BGSprite('pokemon/splat', waterX, waterY, 2, 2);
 					water.cameras = [camHUD];
 					add(water);
 					new FlxTimer().start(5, function(tmr:FlxTimer) {
