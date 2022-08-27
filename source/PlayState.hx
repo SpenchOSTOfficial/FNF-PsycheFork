@@ -310,7 +310,7 @@ class PlayState extends MusicBeatState
 	
 	// Burn functions
 	var burning:Bool = false;
-	var burnLoss:Float = 0.005;
+	var burnLoss:Float = 0.003; //mercy
 	
 	// anim things
 	var blockers:Array<String> = [
@@ -330,7 +330,12 @@ class PlayState extends MusicBeatState
 	var missStreak:Int = 0;
 
         // thing was requested
-        var balls:Int = 5; lololololololololololololol
+        var balls:Int = 5; //lololololololololololololol
+
+	// Water functions
+	public var waterX:Int;
+	public var waterY:Int;
+	public var water:BGSprite;
 
 	override public function create()
 	{
@@ -2294,7 +2299,6 @@ class PlayState extends MusicBeatState
 	public function updateScore(miss:Bool = false)
 	{
 		scoreTxt.text = 'Score: ' + songScore
-		+ ' | Poke' Balls Left: ' + balls
 		+ ' | Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2)
                 + '%';
 
@@ -2866,6 +2870,9 @@ class PlayState extends MusicBeatState
 				burning = false;
 			});
 		}
+
+		waterX = FlxG.random.int(600, 900);
+		waterY = FlxG.random.int(0, 500);
 		
 		for (i in 0...blockers.length) {
 			if (boyfriend.animation.curAnim.name.startsWith(blockers[i]) && !boyfriend.animation.curAnim.finished)
@@ -4695,6 +4702,15 @@ class PlayState extends MusicBeatState
 						boyfriend.playAnim('hurt', true);
 						burning = true;
 					}
+				}
+
+				if(note.noteType == 'Water Note') {
+					var water = new BGSprite('splat', waterX, waterY, 2, 2);
+					water.cameras = [camHUD];
+					add(water);
+					new FlxTimer().start(5, function(tmr:FlxTimer) {
+						FlxTween.tween(water, {alpha: 0}, 1, {ease:FlxEase.quadInOut});
+					});
 				}
 
 				if(note.noteType == 'Hey!') {
