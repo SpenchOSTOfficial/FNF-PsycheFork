@@ -310,7 +310,7 @@ class PlayState extends MusicBeatState
 	
 	// Burn functions
 	var burning:Bool = false;
-	var burnLoss:Float = 0.003; //mercy
+	var burnLoss:Float = 0.0035;
 	
 	// anim things
 	var blockers:Array<String> = [
@@ -325,17 +325,23 @@ class PlayState extends MusicBeatState
 	var animTime:Float = 0;
 	
 	var allowSinging:Bool = true;
-	
-        // miss streak
-	var missStreak:Int = 0;
 
         // thing was requested
         var balls:Int = 5; //lololololololololololololol
+	var missThing:FlxText;
+
+	//vine note
+	var stunTime:Float = 2.5;
 
 	// Water functions
 	public var waterX:Int;
 	public var waterY:Int;
 	public var water:BGSprite;
+
+	// Poison function
+	public var healthDrop:Float = 0;
+	public var healthLost:Float = 0;
+	public var poisoned:Bool = false;
 
 	override public function create()
 	{
@@ -2176,7 +2182,7 @@ class PlayState extends MusicBeatState
 						countdownReady.screenCenter();
 						countdownReady.antialiasing = antialias;
 						insert(members.indexOf(notes), countdownReady);
-						FlxTween.tween(countdownReady, {/*y: countdownReady.y + 100,*/ alpha: 0}, Conductor.crochet / 1000, {
+						FlxTween.tween(countdownReady, {alpha: 0}, Conductor.crochet / 1000, {
 							ease: FlxEase.cubeInOut,
 							onComplete: function(twn:FlxTween)
 							{
@@ -2205,6 +2211,7 @@ class PlayState extends MusicBeatState
 							}
 						});
 						FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
+						boyfriend.playAnim('pre-attack', true);
 					case 3:
 						countdownGo = new FlxSprite().loadGraphic(Paths.image(introAlts[2]));
 						countdownGo.cameras = [camHUD];
@@ -2227,6 +2234,7 @@ class PlayState extends MusicBeatState
 							}
 						});
 						FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
+						boyfriend.playAnim('hey', true);
 					case 4:
 				}
 
@@ -2300,6 +2308,7 @@ class PlayState extends MusicBeatState
 	{
 		scoreTxt.text = 'Score: ' + songScore
 		+ ' | Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2)
+		+ ' | Misses : ' songMisses + '/' + balls
                 + '%';
 
 		if(ClientPrefs.scoreZoom && !miss && !cpuControlled)
@@ -2860,10 +2869,10 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	var limoSpeed:Float = 0;
-	var char:Character = boyfriend;
 
 	override public function update(elapsed:Float)
 	{
+		health -= healthDrop;
 		if (burning) {
 			health -= burnLoss * healthLoss;
 			new FlxTimer().start(3, function(burn:FlxTimer) {
@@ -2871,16 +2880,35 @@ class PlayState extends MusicBeatState
 			});
 		}
 
+		if(poisoned) {
+			healthLost += 0.0008;
+		}
+
+		if(healthLost >= 0.5) {
+			healthLost = 0;
+			healthDrop = 0;
+			poisoned = false;
+		}
+
+
 		waterX = FlxG.random.int(600, 900);
 		waterY = FlxG.random.int(0, 500);
 		
-		for (i in 0...blockers.length) {
-			if (boyfriend.animation.curAnim.name.startsWith(blockers[i]) && !boyfriend.animation.curAnim.finished)
+		for(i in 0...blockers.length) { 
+			if (boyfriend.animation.curAnim.name.startsWith(blockers[i]) && !boyfriend.animation.curAnim.finished) {
 				allowSinging = false;
-			} else {
+			}
+			new FlxTimer().start(animTime, function(tmr:FlxTimer) {
 				allowSinging = true;
-                        }
-                }
+			});
+
+			switch(boyfriend.animation.curAnim.name) {
+				case 'hurt' | 'scared' | 'dodge':
+					animTime = 1;
+				case 'hey' | 'cheer' | 'ugh':
+					animTime = 0.6;
+			}
+		}
 
                 if (balls <= 0) {
                         health = 0;
@@ -4493,10 +4521,12 @@ class PlayState extends MusicBeatState
 		return ret;
 	}
 
+	var missHealth:Float = 0.0475;
+
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
 		notes.forEachAlive(function(note:Note) {
-			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
+			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && !daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
 				note.kill();
 				notes.remove(note, true);
 				note.destroy();
@@ -4583,7 +4613,6 @@ class PlayState extends MusicBeatState
 
 	function opponentNoteHit(note:Note):Void
 	{
-		if (healthBar.percent > 19) health -= 0.023;
 		if (Paths.formatToSongPath(SONG.song) != 'tutorial')
 			camZooming = true;
 
@@ -4659,6 +4688,10 @@ class PlayState extends MusicBeatState
 								boyfriend.playAnim('hurt', true);
 								boyfriend.specialAnim = true;
 							}
+
+						case 'Poison Note':
+							healthDrop += 0.00025;
+							poisoned = true;
 					}
 				}
 
@@ -4697,6 +4730,11 @@ class PlayState extends MusicBeatState
 					boyfriend.holdTimer = 0;
 				}
 
+				if(note.noteType == 'Poison Note')
+					healthDrop += 0.00025;
+					poisoned = true;
+				}
+
 				if(note.noteType == 'Fire Note') {
 					if(boyfriend.animOffsets.exists('hurt')) {
 						boyfriend.playAnim('hurt', true);
@@ -4705,11 +4743,21 @@ class PlayState extends MusicBeatState
 				}
 
 				if(note.noteType == 'Water Note') {
-					var water = new BGSprite('pokemon/splat', waterX, waterY, 2, 2);
-					water.cameras = [camHUD];
-					add(water);
-					new FlxTimer().start(5, function(tmr:FlxTimer) {
-						FlxTween.tween(water, {alpha: 0}, 1, {ease:FlxEase.quadInOut});
+					if(!note.isSustainNote) {
+						var water = new BGSprite('pokemon/splat', waterX, waterY, 2, 2);
+						water.cameras = [camHUD];
+						add(water);
+						new FlxTimer().start(5, function(tmr:FlxTimer) {
+							FlxTween.tween(water, {alpha: 0}, 1, {ease:FlxEase.quadInOut});
+						});
+					}
+				}
+
+				if(note.noteType == 'Vine Note') {
+					boyfriend.playAnim('hurt', true);
+					boyfriend.stunned = true;
+					new FlxTimer().start(stunTime, function(tmr:FlxTimer) {
+						boyfriend.stunned = false;
 					});
 				}
 

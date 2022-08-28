@@ -98,7 +98,6 @@ class Note extends FlxSprite
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
-		//trace('fuck cock');
 		return value;
 	}
 
@@ -155,7 +154,27 @@ class Note extends FlxSprite
 				case 'Fire Note':
 					ignoreNote = mustPress;
 					reloadNote('FIRE');
-					noteSplashTexture = 'HURTnoteSplashes';
+					colorSwap.hue = 0;
+					colorSwap.saturation = 0;
+					colorSwap.brightness = 0;
+					lowPriority = true;
+				case 'Water Note':
+					ignoreNote = mustPress;
+					reloadNote('WATER');
+					colorSwap.hue = 0;
+					colorSwap.saturation = 0;
+					colorSwap.brightness = 0;
+					lowPriority = true;
+				case 'Vine Note':
+					ignoreNote = mustPress;
+					reloadNote('VINE');
+					colorSwap.hue = 0;
+					colorSwap.saturation = 0;
+					colorSwap.brightness = 0;
+					lowPriority = true;
+				case 'Poison Note':
+					ignoreNote = mustPress;
+					reloadNote('POISON');
 					colorSwap.hue = 0;
 					colorSwap.saturation = 0;
 					colorSwap.brightness = 0;
