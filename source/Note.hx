@@ -164,6 +164,7 @@ class Note extends FlxSprite
 					colorSwap.hue = 0;
 					colorSwap.saturation = 0;
 					colorSwap.brightness = 0;
+					noteSplashTexture = 'WaterSplashes';
 					lowPriority = true;
 				case 'Vine Note':
 					ignoreNote = mustPress;
@@ -175,6 +176,27 @@ class Note extends FlxSprite
 				case 'Poison Note':
 					ignoreNote = mustPress;
 					reloadNote('POISON');
+					colorSwap.hue = 0;
+					colorSwap.saturation = 0;
+					colorSwap.brightness = 0;
+					lowPriority = true;
+				case 'Ground Note':
+					ignoreNote = mustPress;
+					//reloadNote('POISON');
+					colorSwap.hue = 0;
+					colorSwap.saturation = 0;
+					colorSwap.brightness = 0;
+					lowPriority = true;
+				case 'Psycho Note':
+					ignoreNote = mustPress;
+					//reloadNote('POISON');
+					colorSwap.hue = 0;
+					colorSwap.saturation = 0;
+					colorSwap.brightness = 0;
+					lowPriority = true;
+				case 'FireSpin Note':
+					ignoreNote = mustPress;
+					reloadNote('FIRE-SPIN');
 					colorSwap.hue = 0;
 					colorSwap.saturation = 0;
 					colorSwap.brightness = 0;
