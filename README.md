@@ -1,2 +1,2 @@
 # Friday Night Funkin' - Poke Side
-a normal pokemon mod
+goofy ahh pokemon mod
